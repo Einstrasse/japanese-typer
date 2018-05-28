@@ -5,7 +5,7 @@ var is_korean = function(txt) {
 	return /[가-힣]|[ㅇ]|[ㅅ]|[ㅑ]|[ㅠ]|[ㅛ]/.test(txt);
 }
 var is_special = function(txt) {
-	return /[_]|[ㅏ]|[ㅣ]|[ㅜ]|[ㅔ]|[ㅗ]|[ㅑ]|[ㅠ]|[ㅛ]/.test(txt);
+	return /[_]|[ㅏ]|[ㅣ]|[ㅜ]|[ㅔ]|[ㅗ]|[ㅑ]|[ㅠ]|[ㅛ]|[ㅡ]/.test(txt);
 }
 
 var jap2jap = function(j, k) {
@@ -15,7 +15,7 @@ var jap2jap = function(j, k) {
 				return 'あ';
 			if (k === 'ㅣ')
 				return 'い';
-			if (k === 'ㅜ')
+			if (k === 'ㅜ' || k === 'ㅡ')
 				return 'う';
 			if (k === 'ㅔ')
 				return 'え';
@@ -28,12 +28,17 @@ var jap2jap = function(j, k) {
 			if (k === 'ㅛ')
 				return 'よ';
 			break;
+		case 'う':
+			if (k === 'ㅇ') 
+				return 'ん';
+			break;
+			
 		case 'っ': //ㅅ
 			if (k === 'ㅏ')
 				return 'さ';
 			if (k === 'ㅣ')
 				return 'し';
-			if (k === 'ㅜ')
+			if (k === 'ㅜ' || k ==='ㅡ')
 				return 'す';
 			if (k === 'ㅔ')
 				return 'せ';
@@ -116,6 +121,7 @@ var kor2jap = function(k, c) {
 		case '치':
 			return 'ち';
 		case '쯔':
+		case '쓰':
 		case '츠':
 			return 'つ';
 		case '테':
@@ -254,6 +260,7 @@ input.bind('input propertychange', function(e) {
 		if (changed) {
 			output.val(output.val().slice(0, -1) + changed);
 			input.val('');
+			return;
 		}
 	}
 });
