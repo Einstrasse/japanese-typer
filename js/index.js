@@ -211,3 +211,25 @@ input.bind('input propertychange', function(e) {
 		}
 	}
 });
+
+$('#search').click(function() {
+	var japanese_string = output.val();
+	var dest_url = `https://translate.google.com/#ja/ko/${japanese_string}`;
+
+	var script = 'if (location.hostname === "translate.google.com") {\
+		location.href = "' + dest_url + '"\
+	} else {\
+		"Notworked";\
+	}';
+	console.log(script);
+	chrome.tabs.executeScript({
+		code: script
+	}, function(res) {
+		if (res.length > 0 && res[0] === 'Notworked') {
+			chrome.tabs.create({
+				url: dest_url,
+				active: true
+			});
+		}
+	});
+})
