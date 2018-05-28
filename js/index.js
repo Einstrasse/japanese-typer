@@ -2,24 +2,86 @@ var output = $('#out');
 var input = $('#in');
 
 var is_korean = function(txt) {
-	return /[가-힣]|[ㅊ]/.test(txt);
+	return /[가-힣]|[ㅇ]|[ㅅ]|[ㅑ]|[ㅠ]|[ㅛ]/.test(txt);
 }
 var is_special = function(txt) {
-	return /[_]|[ㅏ]/.test(txt);
+	return /[_]|[ㅏ]|[ㅣ]|[ㅜ]|[ㅔ]|[ㅗ]|[ㅑ]|[ㅠ]|[ㅛ]/.test(txt);
 }
 
-var trans = function(k, c) {
+var jap2jap = function(j, k) {
+	switch(j) {
+		case 'ん': //ㅇ
+			if (k === 'ㅏ')
+				return 'あ';
+			if (k === 'ㅣ')
+				return 'い';
+			if (k === 'ㅜ')
+				return 'う';
+			if (k === 'ㅔ')
+				return 'え';
+			if (k === 'ㅗ')
+				return 'お';
+			if (k === 'ㅑ')
+				return 'や';
+			if (k === 'ㅠ')
+				return 'ゆ';
+			if (k === 'ㅛ')
+				return 'よ';
+			break;
+		case 'っ': //ㅅ
+			if (k === 'ㅏ')
+				return 'さ';
+			if (k === 'ㅣ')
+				return 'し';
+			if (k === 'ㅜ')
+				return 'す';
+			if (k === 'ㅔ')
+				return 'せ';
+			if (k === 'ㅗ')
+				return 'そ';
+			break;
+		case 'お': //오
+			if (k === 'ㅏ') 
+				return 'わ';
+			if (k === '_')
+				return 'を';
+			break;
+		case 'じ': //지
+			if (k === '_')
+				return 'ぢ'; //지_
+			break;
+		case 'ず': //즈
+			if (k === '_')
+				return 'づ'; //즈_
+			break;
+		case 'や':
+			if (k === '_')
+				return 'ゃ';
+			break;
+		case 'ゆ':
+			if (k === '_')
+				return 'ゅ';
+			break;
+		case 'よ':
+			if (k === '_')
+				return 'ょ';
+			break;
+	}
+	return '';
+}
+var kor2jap = function(k, c) {
 	switch(k) {
-		case '아':
-			return 'あ';
-		case '이':
-			return 'い';
-		case '우':
-			return 'う';
-		case '에':
-			return 'え';
-		case '오':
-			return 'お';
+
+		// case '아':
+		// 	return 'あ';
+		// case '이':
+		// 	return 'い';
+		// case '우':
+		// 	return 'う';
+		// case '에':
+		// 	return 'え';
+		// case '오':
+		// 	return 'お';
 		case '카':
 		case '까':
 			return 'か';
@@ -43,6 +105,7 @@ var trans = function(k, c) {
 		case '수':
 			return 'す';
 		case '세':
+		case '새':
 			return 'せ';
 		case '소':
 			return 'そ';
@@ -52,8 +115,8 @@ var trans = function(k, c) {
 		case '찌':
 		case '치':
 			return 'ち';
-		case '츠':
 		case '쯔':
+		case '츠':
 			return 'つ';
 		case '테':
 		case '태':
@@ -91,12 +154,7 @@ var trans = function(k, c) {
 			return 'め';
 		case '모':
 			return 'も';
-		case '야':
-			return 'や';
-		case '유':
-			return 'ゆ';
-		case '요':
-			return 'よ';
+		
 		case '라':
 			return 'ら';
 		case '리':
@@ -107,14 +165,7 @@ var trans = function(k, c) {
 			return 'れ';
 		case '로':
 			return 'ろ';
-		case 'お':
-			if (c === 'ㅏ')
-				return 'わ';
-			else if (c === '_')
-				return 'を';
-			else return '';
-			break;
-		case '응':
+		case 'ㅇ':
 			return 'ん';
 		case '가':
 			return 'が';
@@ -144,8 +195,6 @@ var trans = function(k, c) {
 			return 'だ';
 		case 'じ':
 			return 'ぢ';
-		case 'ず':
-			return 'づ';
 		case '데':
 		case '대':
 			return 'で';
@@ -173,14 +222,9 @@ var trans = function(k, c) {
 			return 'ぺ';
 		case '포':
 			return 'ぽ';
-		case 'ㅊ':
+		case 'ㅅ':
 			return 'っ';
-		case 'や':
-			return 'ゃ';
-		case 'ゆ':
-			return 'ゅ';
-		case 'よ':
-			return 'ょ';
+			//TODO: 복합 요음 문자.(e.g 쿄 => きょ) 처리 필요
 
 	}
 	return '';
@@ -196,17 +240,19 @@ input.keydown(function(e) {
 input.bind('input propertychange', function(e) {
 	var val = this.value;
 	if (is_korean(val)) {
-		var ch = trans(val);
+		var ch = kor2jap(val);
 		if (ch) {
 			output.val(output.val() + ch);
 			input.val('');
+			return;
 		}
-	} else if (is_special(val)) {
+	}
+	if (is_special(val)) {
 		if (output.val().length === 0) return;
 		var last = output.val().slice(-1);
-		var changed = trans(last, val);
+		var changed = jap2jap(last, val);
 		if (changed) {
-			output.val(output.val().slice(0, -1) + trans(last, val));
+			output.val(output.val().slice(0, -1) + changed);
 			input.val('');
 		}
 	}
