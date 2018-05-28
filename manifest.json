@@ -1,0 +1,26 @@
+{
+	"name": "Japanese Typer",
+	"version": "1.0",
+	"description": "You can buy something in every page",
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"manifest_version": 2,
+	"browser_action": {
+		"default_icon": "res/icon_32.png",
+		"default_popup": "view/index.html"
+	},
+	"icons": {
+		"16": "res/icon_16.png",
+		"24": "res/icon_24.png",
+		"32": "res/icon_32.png"
+	},
+	"permissions": [
+		"activeTab",
+		"storage",
+		"declarativeContent",
+		"tabs"
+	]
+}
