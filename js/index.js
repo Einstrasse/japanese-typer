@@ -1,5 +1,17 @@
 var output = $('#out');
 var input = $('#in');
+var search = $('#search');
+
+const history_limit = 200;
+if(localStorage.getItem('history')) {
+	var data = localStorage.getItem('history').split(',');
+	if (data.length > 0) {
+		var last = data[data.length - 1];
+		output.val(last);
+	}
+} else {
+	localStorage.setItem('history', "")
+}
 
 var is_korean = function(txt) {
 	return /[가-힣]|[ㅇ]|[ㅅ]|[ㅑ]|[ㅠ]|[ㅛ]/.test(txt);
@@ -236,19 +248,34 @@ var kor2jap = function(k, c) {
 	return '';
 }
 
+var save_history = function() {
+	var val = output.val();
+	var data = localStorage.getItem('history').split(',');
+	data.push(val);
+	if (data.length > history_limit) {
+		data.splice(0, data.length/2);
+	}
+	localStorage.setItem('history', data);
+};
+
 input.keydown(function(e) {
 	if (e.keyCode === 8) {
 		if (input.val().length === 0) {
 			output.val(output.val().slice(0, -1));
 		}
+	} else if (e.keyCode === 13) {
+		google_translate();
+		e.preventDefault();
 	}
 })
+
 input.bind('input propertychange', function(e) {
 	var val = this.value;
 	if (is_korean(val)) {
 		var ch = kor2jap(val);
 		if (ch) {
 			output.val(output.val() + ch);
+			save_history();
 			input.val('');
 			return;
 		}
@@ -259,13 +286,15 @@ input.bind('input propertychange', function(e) {
 		var changed = jap2jap(last, val);
 		if (changed) {
 			output.val(output.val().slice(0, -1) + changed);
+			save_history();
 			input.val('');
 			return;
 		}
 	}
 });
 
-$('#search').click(function() {
+
+var google_translate = function() {
 	var japanese_string = output.val();
 	var dest_url = `https://translate.google.com/#ja/ko/${japanese_string}`;
 
@@ -285,4 +314,10 @@ $('#search').click(function() {
 			});
 		}
 	});
-})
+	
+}
+var clear_history = function() {
+	localStorage.clear();
+}
+search.click(google_translate);
+$('#history_clear').click(clear_history);
